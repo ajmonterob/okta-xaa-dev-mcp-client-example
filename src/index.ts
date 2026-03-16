@@ -7,7 +7,7 @@
  * servers — each with its own resource-specific access token.
  *
  * Flow:
- *   1. OIDC login (PKCE) → ID Token
+ *   1. OIDC login (PKCE) → ID Token 
  *   2. For each MCP server: withCrossAppAccess() exchanges the ID Token for
  *      a resource-specific access token (Token Exchange + JWT Bearer grant)
  *   3. Claude AI chat loop routes tool calls to the correct server
@@ -331,7 +331,7 @@ Tool descriptions show which server they belong to in [brackets]. Use the approp
     });
 
   console.log('\n' + chalk.bold.green('=== MCP Interactive Chat ==='));
-  console.log(chalk.gray('Chat with Claude about your MCP resources.'));
+  console.log(chalk.gray('Chat with Your Agent about your MCP resources.'));
   console.log(chalk.gray('Type "quit" to exit.\n'));
 
   // --- Chat loop ---
@@ -399,16 +399,16 @@ Tool descriptions show which server they belong to in [brackets]. Use the approp
         });
       }
 
-      // --- Display Claude's response ---
+      // --- Display the agent response ---
 
       spinner.stop();
       conversationHistory.push({ role: 'assistant', content: response.content });
 
       const text = response.content.find((b): b is Anthropic.TextBlock => b.type === 'text');
       if (text) {
-        console.log(chalk.green('Claude: ') + text.text + '\n');
+        console.log(chalk.green('Your Agent: ') + text.text + '\n');
       } else {
-        console.log(chalk.yellow('Claude: ') + '[No text response]\n');
+        console.log(chalk.yellow('Your Agent: ') + '[No text response]\n');
       }
     } catch (error) {
       spinner.fail('Error');
