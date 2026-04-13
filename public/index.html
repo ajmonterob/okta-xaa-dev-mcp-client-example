@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identity AI Agent</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #1a1b1e;
+      color: #e5e7eb;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      background: #141517;
+      border-right: 1px solid #2d2f36;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 14px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 28px;
+    }
+    .logo-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #7c3aed;
+      flex-shrink: 0;
+    }
+    .logo h1 { font-size: 14px; font-weight: 600; color: #f3f4f6; }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #4b5563;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-section { margin-bottom: 22px; }
+
+    .tag {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: #9ca3af;
+      padding: 3px 0;
+    }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot.green  { background: #10b981; }
+    .dot.grey   { background: #4b5563; }
+    .dot.purple { background: #7c3aed; }
+
+    .user-section {
+      margin-top: auto;
+      border-top: 1px solid #2d2f36;
+      padding-top: 14px;
+    }
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+    }
+    .avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: #7c3aed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .user-email {
+      font-size: 12px;
+      color: #9ca3af;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .logout-btn {
+      width: 100%;
+      background: none;
+      border: 1px solid #2d2f36;
+      color: #6b7280;
+      padding: 6px 0;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .logout-btn:hover { border-color: #4b5563; color: #d1d5db; }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Login screen ── */
+    #login-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 40px;
+    }
+    #login-screen h2 { font-size: 22px; font-weight: 600; }
+    #login-screen p {
+      font-size: 14px;
+      color: #9ca3af;
+      text-align: center;
+      max-width: 340px;
+      line-height: 1.6;
+    }
+    .login-btn {
+      background: #7c3aed;
+      color: #fff;
+      border: none;
+      padding: 11px 26px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+      display: inline-block;
+    }
+    .login-btn:hover { background: #6d28d9; }
+
+    .error-banner {
+      background: #2d1515;
+      border: 1px solid #7f1d1d;
+      color: #fca5a5;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    /* ── Chat screen ── */
+    #chat-screen { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    #chat-screen.visible { display: flex; }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 0 8px;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      gap: 13px;
+      align-items: flex-start;
+    }
+    .msg-avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+    .message.user .msg-avatar { background: #374151; color: #d1d5db; }
+    .message.agent .msg-avatar { background: #7c3aed; color: #fff; }
+
+    .msg-body { flex: 1; font-size: 15px; line-height: 1.65; color: #e5e7eb; min-width: 0; }
+    .message.user .msg-body { color: #d1d5db; }
+
+    /* Markdown inside agent messages */
+    .msg-body p { margin-bottom: 10px; }
+    .msg-body p:last-child { margin-bottom: 0; }
+    .msg-body ul, .msg-body ol { padding-left: 20px; margin-bottom: 10px; }
+    .msg-body li { margin-bottom: 3px; }
+    .msg-body strong { color: #f3f4f6; }
+    .msg-body a { color: #a78bfa; }
+    .msg-body blockquote {
+      border-left: 3px solid #374151;
+      padding-left: 12px;
+      color: #9ca3af;
+      margin: 8px 0;
+    }
+    .msg-body h1, .msg-body h2, .msg-body h3 {
+      margin: 14px 0 6px;
+      color: #f3f4f6;
+    }
+    .msg-body code {
+      background: #2d2f36;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+    }
+    .msg-body pre {
+      background: #1e1f23;
+      border: 1px solid #2d2f36;
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    .msg-body pre code {
+      background: none;
+      padding: 0;
+      font-size: 13px;
+    }
+
+    /* Tool cards */
+    .tool-card {
+      background: #1e1f23;
+      border: 1px solid #2d2f36;
+      border-radius: 8px;
+      margin: 8px 0;
+      font-size: 13px;
+      overflow: hidden;
+    }
+    .tool-card summary {
+      padding: 9px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9ca3af;
+      list-style: none;
+      user-select: none;
+    }
+    .tool-card summary::-webkit-details-marker { display: none; }
+    .tool-card summary:hover { color: #d1d5db; }
+    .tool-card[open] summary { border-bottom: 1px solid #2d2f36; }
+    .tool-name-badge { color: #a78bfa; font-weight: 500; }
+    .tool-status { margin-left: auto; font-size: 11px; }
+    .tool-result-body {
+      padding: 10px 14px;
+      color: #6b7280;
+      font-family: 'SF Mono', 'Menlo', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .tool-card.is-error .tool-name-badge { color: #f87171; }
+
+    /* Thinking dots */
+    .thinking {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 0;
+    }
+    .thinking span {
+      width: 6px; height: 6px;
+      background: #4b5563;
+      border-radius: 50%;
+      animation: blink 1.4s infinite;
+    }
+    .thinking span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Input area */
+    .input-area {
+      border-top: 1px solid #2d2f36;
+      padding: 14px 24px 18px;
+    }
+    .input-row {
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .input-box {
+      flex: 1;
+      background: #1e1f23;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px 14px;
+      transition: border-color 0.15s;
+    }
+    .input-box:focus-within { border-color: #7c3aed; }
+    #msg-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: #e5e7eb;
+      font-size: 15px;
+      font-family: inherit;
+      line-height: 1.5;
+      resize: none;
+      min-height: 24px;
+      max-height: 160px;
+    }
+    #msg-input::placeholder { color: #374151; }
+    .send-btn {
+      width: 36px; height: 36px;
+      background: #7c3aed;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .send-btn:hover:not(:disabled) { background: #6d28d9; }
+    .send-btn:disabled { background: #2d2f36; cursor: not-allowed; }
+    .send-btn svg { width: 15px; height: 15px; }
+
+    /* Scrollbar */
+    .messages::-webkit-scrollbar { width: 5px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: #2d2f36; border-radius: 3px; }
+
+    /* Responsive: hide sidebar on small screens */
+    @media (max-width: 600px) { .sidebar { display: none; } }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ Sidebar ═══════════════════════ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <h1>Identity AI Agent</h1>
+  </div>
+
+  <div class="sidebar-section" id="auth-section">
+    <div class="sidebar-label">Auth Status</div>
+    <div class="tag" id="auth-tag">
+      <div class="dot grey"></div>
+      <span>Not signed in</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="servers-section" style="display:none">
+    <div class="sidebar-label">MCP Servers</div>
+    <div id="server-list"></div>
+  </div>
+
+  <div class="user-section" id="user-section" style="display:none">
+    <div class="user-row">
+      <div class="avatar" id="user-avatar">U</div>
+      <div class="user-email" id="user-email"></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</aside>
+
+<!-- ═══════════════════════ Main ═══════════════════════ -->
+<main class="main">
+
+  <!-- Login screen -->
+  <div id="login-screen">
+    <h2>Identity AI Agent</h2>
+    <p>Sign in with your identity provider to connect to your MCP servers and start chatting with your AI agent.</p>
+    <div id="error-msg" style="display:none" class="error-banner"></div>
+    <a href="/login" class="login-btn">Sign in with Okta</a>
+  </div>
+
+  <!-- Chat screen -->
+  <div id="chat-screen">
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <div class="input-row">
+        <div class="input-box">
+          <textarea id="msg-input" rows="1" placeholder="Message your agent…" disabled></textarea>
+        </div>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled title="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ── Configure marked ──────────────────────────────────────────────────────
+  marked.setOptions({ breaks: true, gfm: true });
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let streaming = false;
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  async function init() {
+    // Show error from query param if present
+    const params = new URLSearchParams(location.search);
+    if (params.get('error')) {
+      const el = document.getElementById('error-msg');
+      el.textContent = 'Authentication failed. Please try again.';
+      el.style.display = 'block';
+      history.replaceState({}, '', '/');
+    }
+
+    const res = await fetch('/api/status');
+    const status = await res.json();
+
+    if (status.authenticated) {
+      showChatScreen(status);
+    }
+  }
+
+  function showChatScreen(status) {
+    document.getElementById('login-screen').style.display = 'none';
+    const chatScreen = document.getElementById('chat-screen');
+    chatScreen.style.display = 'flex';
+    chatScreen.style.flexDirection = 'column';
+    chatScreen.style.flex = '1';
+    chatScreen.style.overflow = 'hidden';
+
+    const input = document.getElementById('msg-input');
+    const btn   = document.getElementById('send-btn');
+    input.disabled = false;
+    btn.disabled   = false;
+    input.focus();
+
+    // Auth status
+    document.getElementById('auth-tag').innerHTML =
+      '<div class="dot purple"></div><span>XAA Connected</span>';
+
+    // Servers list
+    if (status.servers?.length) {
+      document.getElementById('servers-section').style.display = 'block';
+      document.getElementById('server-list').innerHTML =
+        status.servers.map(s =>
+          `<div class="tag"><div class="dot green"></div><span>${esc(s)}</span></div>`
+        ).join('');
+    }
+
+    // User info
+    if (status.user) {
+      document.getElementById('user-section').style.display = 'block';
+      document.getElementById('user-email').textContent = status.user;
+      document.getElementById('user-avatar').textContent = status.user[0].toUpperCase();
+    }
+  }
+
+  // ── Send message ──────────────────────────────────────────────────────────
+  async function sendMessage() {
+    const input = document.getElementById('msg-input');
+    const msg   = input.value.trim();
+    if (!msg || streaming) return;
+
+    input.value = '';
+    autoResize(input);
+    streaming = true;
+    document.getElementById('send-btn').disabled = true;
+
+    // User bubble
+    addMessage('user', msg);
+
+    // Agent bubble (empty, will stream into it)
+    const agentEl  = addMessage('agent', null);
+    const bodyEl   = agentEl.querySelector('.msg-body');
+    bodyEl.innerHTML = thinkingDots();
+
+    let fullText       = '';
+    let hasText        = false;
+    let currentCard    = null;
+
+    try {
+      const resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg }),
+      });
+
+      const reader  = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let   buf     = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          let evt;
+          try { evt = JSON.parse(line.slice(6)); } catch { continue; }
+
+          switch (evt.type) {
+
+            case 'thinking':
+              // Show dots only if no text started yet in this segment
+              if (!hasText) bodyEl.innerHTML = thinkingDots();
+              break;
+
+            case 'token':
+              if (!hasText) {
+                // First token — clear the thinking dots, start clean
+                // Remove only the thinking div, leave any existing tool cards
+                const td = bodyEl.querySelector('.thinking');
+                if (td) td.remove();
+                hasText = true;
+              }
+              fullText += evt.text;
+              // Append a live text node (fast, no markdown parsing during stream)
+              let liveSpan = bodyEl.querySelector('.live-text');
+              if (!liveSpan) {
+                liveSpan = document.createElement('span');
+                liveSpan.className = 'live-text';
+                bodyEl.appendChild(liveSpan);
+              }
+              liveSpan.textContent = fullText;
+              scrollBottom();
+              break;
+
+            case 'tool_start': {
+              // Remove live text span temporarily while we add the card
+              const live = bodyEl.querySelector('.live-text');
+              if (live) live.remove();
+
+              const card = document.createElement('details');
+              card.className = 'tool-card';
+              card.innerHTML =
+                `<summary>` +
+                  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.6"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>` +
+                  `<span>Used tool: <span class="tool-name-badge">${esc(evt.name)}</span></span>` +
+                  `<span class="tool-status">Running…</span>` +
+                `</summary>`;
+              bodyEl.appendChild(card);
+              currentCard = card;
+
+              // Re-append live span after the card
+              if (live) bodyEl.appendChild(live);
+              scrollBottom();
+              break;
+            }
+
+            case 'tool_result':
+              if (currentCard) {
+                const statusEl = currentCard.querySelector('.tool-status');
+                if (statusEl) statusEl.textContent = evt.isError ? '✗ Error' : '✓ Done';
+                if (evt.isError) currentCard.classList.add('is-error');
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'tool-result-body';
+                resultDiv.textContent = evt.preview;
+                currentCard.appendChild(resultDiv);
+                currentCard = null;
+              }
+              // Reset for next Claude segment
+              hasText = false;
+              scrollBottom();
+              break;
+
+            case 'done': {
+              // Final render: replace live span with full markdown
+              const live = bodyEl.querySelector('.live-text');
+              if (live) live.remove();
+              if (fullText) {
+                const md = document.createElement('div');
+                md.innerHTML = marked.parse(fullText);
+                bodyEl.appendChild(md);
+                md.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+              }
+              scrollBottom();
+              break;
+            }
+
+            case 'error':
+              bodyEl.innerHTML = `<span style="color:#f87171">Error: ${esc(evt.message)}</span>`;
+              break;
+          }
+        }
+      }
+    } catch {
+      bodyEl.innerHTML = '<span style="color:#f87171">Connection error — please try again.</span>';
+    }
+
+    streaming = false;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('msg-input').focus();
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function addMessage(role, text) {
+    const wrap = document.createElement('div');
+    wrap.className = `message ${role}`;
+    wrap.innerHTML =
+      `<div class="msg-avatar">${role === 'user' ? 'U' : 'AI'}</div>` +
+      `<div class="msg-body">${text ? esc(text) : ''}</div>`;
+    document.getElementById('messages').appendChild(wrap);
+    scrollBottom();
+    return wrap;
+  }
+
+  function thinkingDots() {
+    return '<div class="thinking"><span></span><span></span><span></span></div>';
+  }
+
+  function scrollBottom() {
+    const el = document.getElementById('messages');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  async function logout() {
+    await fetch('/api/logout', { method: 'POST' });
+    location.reload();
+  }
+
+  // ── Keyboard & auto-resize ────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('msg-input');
+    input.addEventListener('input', () => autoResize(input));
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    init();
+  });
+</script>
+</body>
+</html>
