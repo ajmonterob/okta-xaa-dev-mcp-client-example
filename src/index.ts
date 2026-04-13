@@ -55,6 +55,17 @@ interface ResourceInfo {
   server: string;
 }
 
+interface TokenReviewRecord {
+  raw: string;
+  header: unknown;
+  payload: unknown;
+}
+
+interface IdentityReviewData {
+  idToken: TokenReviewRecord;
+  delegatedTokens: Record<string, TokenReviewRecord>;
+}
+
 interface McpSessionData {
   connectedServers: Map<string, Client>;
   toolServerMap: Map<string, string>;
@@ -63,6 +74,7 @@ interface McpSessionData {
   conversationHistory: Anthropic.MessageParam[];
   systemPrompt: string;
   userEmail: string;
+  identityReview: IdentityReviewData;
 }
 
 // Extend express-session with our PKCE fields
@@ -106,6 +118,76 @@ const PORT = parseInt(process.env.PORT || '3333', 10);
 const CALLBACK_URL = process.env.CALLBACK_URL || `http://localhost:${PORT}/callback`;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-in-production';
 
+function decodeJwtPart(part: string): unknown {
+  try {
+    const normalized = part.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function buildTokenReviewRecord(raw: string | undefined): TokenReviewRecord | null {
+  if (!raw) return null;
+
+  const [header = '', payload = ''] = raw.split('.');
+  return {
+    raw,
+    header: decodeJwtPart(header),
+    payload: decodeJwtPart(payload),
+  };
+}
+
+function getTokenScopes(token: TokenReviewRecord | undefined): string[] {
+  if (!token || !token.payload || typeof token.payload !== 'object') return [];
+
+  const payload = token.payload as Record<string, unknown>;
+  const scopeClaim = payload.scope;
+  if (typeof scopeClaim === 'string') {
+    return scopeClaim.split(/\s+/).map((scope) => scope.trim()).filter(Boolean);
+  }
+
+  const scpClaim = payload.scp;
+  if (Array.isArray(scpClaim)) {
+    return scpClaim.filter((scope): scope is string => typeof scope === 'string' && scope.length > 0);
+  }
+
+  return [];
+}
+
+function formatToolError(
+  err: unknown,
+  serverName: string,
+  identityReview: IdentityReviewData
+): string {
+  const rawMessage = err instanceof Error ? err.message : String(err);
+  const normalizedMessage = rawMessage.toLowerCase();
+  const delegatedToken = identityReview.delegatedTokens[serverName];
+  const delegatedScopes = getTokenScopes(delegatedToken);
+
+  const deniedByScope =
+    normalizedMessage.includes('insufficient_scope') ||
+    normalizedMessage.includes('insufficient scope') ||
+    normalizedMessage.includes('forbidden') ||
+    normalizedMessage.includes('not authorized') ||
+    normalizedMessage.includes('permission') ||
+    normalizedMessage.includes('403') ||
+    normalizedMessage.includes('401');
+
+  if (!deniedByScope) {
+    return `Server ${serverName} rejected the action: ${rawMessage}`;
+  }
+
+  const scopeText = delegatedScopes.length > 0 ? delegatedScopes.join(', ') : 'no scope claim found in delegated token';
+  return [
+    `Server ${serverName} rejected the action.`,
+    'This likely means the delegated token does not include the permission required for that tool call.',
+    `Delegated token scopes: ${scopeText}.`,
+    `Original error: ${rawMessage}`,
+  ].join(' ');
+}
+
 // =============================================================================
 // Section 2: connectWithXAA() — Connect to one MCP server using Cross-App Access
 // =============================================================================
@@ -113,8 +195,9 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-in-produ
 async function connectWithXAA(
   idToken: string,
   serverConfig: ServerConfig
-): Promise<Client> {
+): Promise<{ mcpClient: Client; getDelegatedAccessToken: () => string | undefined }> {
   const spinner = ora(`Connecting to ${chalk.bold(serverConfig.name)} using Enterprise Managed Auth Flow...`).start();
+  let delegatedAccessToken: string | undefined;
 
   // This is the key XAA integration point:
   // The middleware handles Token Exchange (ID Token → ID-JAG) at the IDP,
@@ -131,7 +214,15 @@ async function connectWithXAA(
     scope: serverConfig.scopes,
   });
 
-  const enhancedFetch = applyMiddlewares(xaaMiddleware)(fetch);
+  const tokenCaptureFetch: typeof fetch = async (input, init) => {
+    const authHeader = new Headers(init?.headers).get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      delegatedAccessToken = authHeader.slice('Bearer '.length);
+    }
+    return fetch(input, init);
+  };
+
+  const enhancedFetch = applyMiddlewares(xaaMiddleware)(tokenCaptureFetch);
 
   const transport = new StreamableHTTPClientTransport(
     new URL(`${serverConfig.url}/mcp`),
@@ -146,7 +237,10 @@ async function connectWithXAA(
   await mcpClient.connect(transport);
   spinner.succeed(`Connected to ${chalk.bold(serverConfig.name)} ${chalk.gray(serverConfig.url)}`);
 
-  return mcpClient;
+  return {
+    mcpClient,
+    getDelegatedAccessToken: () => delegatedAccessToken,
+  };
 }
 
 // =============================================================================
@@ -229,7 +323,7 @@ async function handleToolCall(
   connectedServers: Map<string, Client>,
   toolServerMap: Map<string, string>,
   resourceServerMap: Map<string, string>
-): Promise<string> {
+): Promise<{ content: string; serverName: string }> {
   const serverName = toolServerMap.get(block.name);
   if (!serverName) throw new Error(`Unknown tool: ${block.name}`);
 
@@ -240,9 +334,12 @@ async function handleToolCall(
     const mcpClient = connectedServers.get(ownerServer)!;
     const result = await mcpClient.readResource({ uri });
 
-    return result.contents
-      .map((c) => ('text' in c ? c.text : `[Binary: ${c.mimeType}]`))
-      .join('\n');
+    return {
+      serverName: ownerServer,
+      content: result.contents
+        .map((c) => ('text' in c ? c.text : `[Binary: ${c.mimeType}]`))
+        .join('\n'),
+    };
   }
 
   // Regular MCP tool call
@@ -252,9 +349,12 @@ async function handleToolCall(
     arguments: block.input as Record<string, unknown>,
   });
 
-  return (result.content as Array<{ type: string; text?: string }>)
-    .map((c) => c.text ?? JSON.stringify(c))
-    .join('\n');
+  return {
+    serverName,
+    content: (result.content as Array<{ type: string; text?: string }>)
+      .map((c) => c.text ?? JSON.stringify(c))
+      .join('\n'),
+  };
 }
 
 // =============================================================================
@@ -352,9 +452,11 @@ app.get('/callback', async (req, res) => {
 
     // Connect all MCP servers via XAA
     const connectedServers = new Map<string, Client>();
+    const delegatedTokenReaders = new Map<string, () => string | undefined>();
     for (const serverConfig of servers) {
-      const mcpClient = await connectWithXAA(idToken, serverConfig);
+      const { mcpClient, getDelegatedAccessToken } = await connectWithXAA(idToken, serverConfig);
       connectedServers.set(serverConfig.name, mcpClient);
+      delegatedTokenReaders.set(serverConfig.name, getDelegatedAccessToken);
     }
 
     // Discover tools and resources
@@ -362,6 +464,15 @@ app.get('/callback', async (req, res) => {
 
     const serverSummary = [...connectedServers.keys()].join(', ');
     const systemPrompt = `You are a helpful assistant connected to these MCP servers: ${serverSummary}. Tool descriptions show which server they belong to in [brackets]. Use the appropriate tools when asked.`;
+    const delegatedTokens = Object.fromEntries(
+      [...delegatedTokenReaders.entries()]
+        .map(([serverName, readToken]) => [serverName, buildTokenReviewRecord(readToken())])
+        .filter((entry): entry is [string, TokenReviewRecord] => entry[1] !== null)
+    );
+    const reviewedIdToken = buildTokenReviewRecord(idToken);
+    if (!reviewedIdToken) {
+      throw new Error('Failed to decode ID token for identity review');
+    }
 
     mcpSessions.set(req.sessionID, {
       connectedServers,
@@ -371,6 +482,10 @@ app.get('/callback', async (req, res) => {
       conversationHistory: [],
       systemPrompt,
       userEmail,
+      identityReview: {
+        idToken: reviewedIdToken,
+        delegatedTokens,
+      },
     });
 
     console.log(chalk.green(`Session ready for ${userEmail}\n`));
@@ -392,6 +507,7 @@ app.get('/api/status', (req, res) => {
       authenticated: true,
       user: data.userEmail,
       servers: [...data.connectedServers.keys()],
+      identityReview: data.identityReview,
     });
   } else {
     res.json({ authenticated: false });
@@ -425,7 +541,7 @@ app.post('/api/chat', async (req, res) => {
     res.write(`data: ${JSON.stringify(payload)}\n\n`);
   };
 
-  const { connectedServers, toolServerMap, resourceServerMap, tools, conversationHistory, systemPrompt } = data;
+  const { connectedServers, toolServerMap, resourceServerMap, tools, conversationHistory, systemPrompt, identityReview } = data;
 
   conversationHistory.push({ role: 'user', content: message.trim() });
 
@@ -463,20 +579,22 @@ app.post('/api/chat', async (req, res) => {
         const toolResults: Anthropic.ToolResultBlockParam[] = [];
 
         for (const block of toolUseBlocks) {
-          send({ type: 'tool_start', name: block.name });
+          const toolServerName = toolServerMap.get(block.name) || 'Unknown MCP Server';
+          send({ type: 'tool_start', name: block.name, server: toolServerName });
 
           try {
-            const content = await handleToolCall(
+            const { content, serverName } = await handleToolCall(
               block,
               connectedServers,
               toolServerMap,
               resourceServerMap
             );
-            send({ type: 'tool_result', name: block.name, preview: content.slice(0, 400) });
+            send({ type: 'tool_result', name: block.name, server: serverName, preview: content.slice(0, 400) });
             toolResults.push({ type: 'tool_result', tool_use_id: block.id, content });
           } catch (err) {
-            const errMsg = `Error: ${err instanceof Error ? err.message : String(err)}`;
-            send({ type: 'tool_result', name: block.name, preview: errMsg, isError: true });
+            const serverName = toolServerMap.get(block.name) || 'Unknown MCP Server';
+            const errMsg = formatToolError(err, serverName, identityReview);
+            send({ type: 'tool_result', name: block.name, server: serverName, preview: errMsg, isError: true });
             toolResults.push({
               type: 'tool_result',
               tool_use_id: block.id,

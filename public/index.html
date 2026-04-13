@@ -10,11 +10,17 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html, body {
+      width: 100%;
+      min-height: 100%;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       background: #1a1b1e;
       color: #e5e7eb;
-      height: 100vh;
+      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       overflow: hidden;
     }
@@ -28,6 +34,8 @@
       flex-direction: column;
       padding: 20px 14px;
       flex-shrink: 0;
+      min-height: 0;
+      overflow-y: auto;
     }
 
     .logo {
@@ -54,6 +62,54 @@
     }
 
     .sidebar-section { margin-bottom: 22px; }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 38px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #2d2f36;
+      border: 1px solid #3a3d46;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: #9ca3af;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: #5b21b6;
+      border-color: #7c3aed;
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(16px);
+      background: #fff;
+    }
 
     .tag {
       display: flex;
@@ -121,6 +177,8 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      min-width: 0;
+      min-height: 0;
     }
 
     /* ── Login screen ── */
@@ -132,6 +190,7 @@
       justify-content: center;
       gap: 16px;
       padding: 40px;
+      min-height: 0;
     }
     #login-screen h2 { font-size: 22px; font-weight: 600; }
     #login-screen p {
@@ -166,14 +225,112 @@
     }
 
     /* ── Chat screen ── */
-    #chat-screen { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    #chat-screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
     #chat-screen.visible { display: flex; }
+
+    .review-panel {
+      display: none;
+      padding: 18px 24px 0;
+      overflow-y: auto;
+      max-height: 42vh;
+      flex-shrink: 0;
+    }
+    .review-panel.visible { display: block; }
+    .review-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #16171a;
+      border: 1px solid #2d2f36;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .review-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid #2d2f36;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .review-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f3f4f6;
+    }
+    .review-subtitle {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .review-body {
+      padding: 12px 16px 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .token-card {
+      background: #1e1f23;
+      border: 1px solid #2d2f36;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .token-card summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #d1d5db;
+    }
+    .token-card summary::-webkit-details-marker { display: none; }
+    .token-card summary:hover { background: #24262b; }
+    .token-card[open] summary { border-bottom: 1px solid #2d2f36; }
+    .token-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .token-kind {
+      font-size: 11px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .token-section {
+      padding: 12px 14px;
+      border-top: 1px solid #25272d;
+    }
+    .token-section:first-child { border-top: none; }
+    .token-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .token-pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #d1d5db;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
 
     .messages {
       flex: 1;
       overflow-y: auto;
       padding: 24px 0 8px;
       scroll-behavior: smooth;
+      min-height: 0;
+      overscroll-behavior: contain;
     }
 
     .message {
@@ -299,6 +456,9 @@
     .input-area {
       border-top: 1px solid #2d2f36;
       padding: 14px 24px 18px;
+      flex-shrink: 0;
+      background: #1a1b1e;
+      padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
     }
     .input-row {
       max-width: 700px;
@@ -355,7 +515,45 @@
     .messages::-webkit-scrollbar-thumb { background: #2d2f36; border-radius: 3px; }
 
     /* Responsive: hide sidebar on small screens */
-    @media (max-width: 600px) { .sidebar { display: none; } }
+    @media (max-width: 600px) {
+      body {
+        display: block;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+
+      #login-screen {
+        padding: 28px 20px;
+      }
+
+      .review-panel {
+        padding: 12px 12px 0;
+        max-height: 36vh;
+      }
+
+      .messages {
+        padding-top: 14px;
+      }
+
+      .message {
+        padding: 10px 14px;
+      }
+
+      .input-area {
+        padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+      }
+
+      .input-row {
+        max-width: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -380,6 +578,17 @@
     <div id="server-list"></div>
   </div>
 
+  <div class="sidebar-section" id="review-section" style="display:none">
+    <div class="sidebar-label">Identity Review</div>
+    <div class="toggle-row">
+      <span>Reveal raw tokens</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="identity-toggle" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
   <div class="user-section" id="user-section" style="display:none">
     <div class="user-row">
       <div class="avatar" id="user-avatar">U</div>
@@ -402,6 +611,17 @@
 
   <!-- Chat screen -->
   <div id="chat-screen">
+    <div class="review-panel" id="identity-review-panel">
+      <div class="review-wrap">
+        <div class="review-head">
+          <div>
+            <div class="review-title">Identity Review</div>
+            <div class="review-subtitle">Compare the original ID token against delegated MCP bearer tokens.</div>
+          </div>
+        </div>
+        <div class="review-body" id="identity-review-body"></div>
+      </div>
+    </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
       <div class="input-row">
@@ -426,6 +646,7 @@
 
   // ── State ─────────────────────────────────────────────────────────────────
   let streaming = false;
+  let identityReview = null;
 
   // ── Init ──────────────────────────────────────────────────────────────────
   async function init() {
@@ -479,6 +700,52 @@
       document.getElementById('user-email').textContent = status.user;
       document.getElementById('user-avatar').textContent = status.user[0].toUpperCase();
     }
+
+    identityReview = status.identityReview || null;
+    if (identityReview) {
+      document.getElementById('review-section').style.display = 'block';
+      renderIdentityReview(identityReview);
+      const toggle = document.getElementById('identity-toggle');
+      toggle.checked = false;
+      toggle.addEventListener('change', () => {
+        document.getElementById('identity-review-panel').classList.toggle('visible', toggle.checked);
+      });
+    }
+  }
+
+  function renderIdentityReview(review) {
+    const body = document.getElementById('identity-review-body');
+    const entries = [
+      { name: 'ID Token', kind: 'ID token', token: review.idToken },
+      ...Object.entries(review.delegatedTokens || {}).map(([server, token]) => ({
+        name: server,
+        kind: 'Delegated token',
+        token,
+      })),
+    ];
+
+    body.innerHTML = entries.map((entry, index) =>
+      `<details class="token-card"${index === 0 ? ' open' : ''}>` +
+        `<summary>` +
+          `<div>` +
+            `<div class="token-name">${esc(entry.name)}</div>` +
+            `<div class="token-kind">${esc(entry.kind)}</div>` +
+          `</div>` +
+        `</summary>` +
+        `<div class="token-section">` +
+          `<div class="token-label">Raw Token</div>` +
+          `<pre class="token-pre">${esc(entry.token.raw || '')}</pre>` +
+        `</div>` +
+        `<div class="token-section">` +
+          `<div class="token-label">JWT Header</div>` +
+          `<pre class="token-pre">${esc(prettyJson(entry.token.header))}</pre>` +
+        `</div>` +
+        `<div class="token-section">` +
+          `<div class="token-label">JWT Payload</div>` +
+          `<pre class="token-pre">${esc(prettyJson(entry.token.payload))}</pre>` +
+        `</div>` +
+      `</details>`
+    ).join('');
   }
 
   // ── Send message ──────────────────────────────────────────────────────────
@@ -565,7 +832,7 @@
               card.innerHTML =
                 `<summary>` +
                   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.6"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>` +
-                  `<span>Used tool: <span class="tool-name-badge">${esc(evt.name)}</span></span>` +
+                  `<span>Used tool: <span class="tool-name-badge">${esc(evt.name)}</span> on ${esc(evt.server || 'Unknown MCP Server')}</span>` +
                   `<span class="tool-status">Running…</span>` +
                 `</summary>`;
               bodyEl.appendChild(card);
@@ -647,6 +914,10 @@
     return String(s)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function prettyJson(value) {
+    return JSON.stringify(value, null, 2) || 'null';
   }
 
   function autoResize(el) {
