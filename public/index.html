@@ -606,7 +606,7 @@
     <h2>Identity AI Agent</h2>
     <p>Sign in with your identity provider to connect to your MCP servers and start chatting with your AI agent.</p>
     <div id="error-msg" style="display:none" class="error-banner"></div>
-    <a href="/login" class="login-btn">Sign in with Okta</a>
+    <a href="/login" class="login-btn">Authenticate to use your Enterprise Agent</a>
   </div>
 
   <!-- Chat screen -->
@@ -652,9 +652,14 @@
   async function init() {
     // Show error from query param if present
     const params = new URLSearchParams(location.search);
-    if (params.get('error')) {
+    const errorCode = params.get('error');
+    const errorMessages = {
+      auth_failed: 'Authentication completed, but the enterprise agent session could not be established. Please try again.',
+      session_expired: 'Your sign-in session expired before the callback completed. Please authenticate again.',
+    };
+    if (errorCode && errorMessages[errorCode]) {
       const el = document.getElementById('error-msg');
-      el.textContent = 'Authentication failed. Please try again.';
+      el.textContent = errorMessages[errorCode];
       el.style.display = 'block';
       history.replaceState({}, '', '/');
     }
