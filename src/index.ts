@@ -76,8 +76,9 @@ declare module 'express-session' {
 
 // --- Environment ---
 
-const servers: ServerConfig[] = [
+const serverEnvConfigs = [
   {
+    enabled: process.env.MCP_SERVER_1_ENABLED,
     name: process.env.MCP_SERVER_1_NAME || 'QRTY MCP Server',
     url: process.env.MCP_SERVER_1_URL || 'https://mcp.qrty.page',
     authServerUrl: process.env.MCP_SERVER_1_AUTH_URL || 'https://auth.resource.xaa.dev',
@@ -85,6 +86,7 @@ const servers: ServerConfig[] = [
     scopes: (process.env.MCP_SERVER_1_SCOPES || 'mcp.access').split(','),
   },
   {
+    enabled: process.env.MCP_SERVER_2_ENABLED,
     name: process.env.MCP_SERVER_2_NAME || 'Todo0 MCP Server',
     url: process.env.MCP_SERVER_2_URL || 'https://mcp.xaa.dev',
     authServerUrl: process.env.MCP_SERVER_2_AUTH_URL || 'https://auth.resource.xaa.dev',
@@ -92,6 +94,10 @@ const servers: ServerConfig[] = [
     scopes: (process.env.MCP_SERVER_2_SCOPES || 'todos.read,mcp.access').split(','),
   },
 ];
+
+const servers: ServerConfig[] = serverEnvConfigs
+  .filter((server) => server.enabled !== 'false')
+  .map(({ enabled: _enabled, ...server }) => server);
 
 const IDP_URL = process.env.IDP_URL || 'https://idp.xaa.dev';
 const CLIENT_ID = process.env.CLIENT_ID || '';
