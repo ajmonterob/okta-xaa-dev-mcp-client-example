@@ -72,6 +72,29 @@ You can ask Claude to use tools from any connected server. For example:
 
 Type `quit` to exit.
 
+## Stable AWS HTTPS Setup
+
+For local development hosted on an EC2 instance, this repo can be exposed through a stable HTTPS callback URL without `ngrok`.
+
+Example setup used on this server:
+
+```text
+Public app URL: https://labai.54-175-248-13.sslip.io
+Redirect URI:   https://labai.54-175-248-13.sslip.io/callback
+Post logout:    https://labai.54-175-248-13.sslip.io/
+Local app:      http://127.0.0.1:3333
+```
+
+Implementation notes:
+
+- Caddy listens on ports `80` and `443`
+- Caddy reverse proxies traffic to `127.0.0.1:3333`
+- Let's Encrypt issues the TLS certificate automatically
+- The EC2 security group must allow inbound TCP `80` and `443`
+- The app should set `CALLBACK_URL` to the public HTTPS callback URL
+
+Operationally, the app and reverse proxy are run as `systemd` services so they survive logout and reboot.
+
 ## How XAA Works
 
 The key integration point is the `withCrossAppAccess()` middleware from the MCP SDK:

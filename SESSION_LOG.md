@@ -25,13 +25,30 @@ Host: AWS EC2 Ubuntu 24.04
 
 - Pulled the latest `origin/development` web-app refactor commit.
 - Reconfigured the app from local callback mode to public callback mode.
+- Initially exposed the app through `ngrok`, then replaced that setup with a stable AWS-hosted HTTPS endpoint.
+
+### Prior ngrok Setup
+
 - Installed and configured `ngrok`.
-- Active public app URL:
+- Previous public app URL:
   - `https://0787-54-175-248-13.ngrok-free.app`
-- Active callback URL:
+- Previous callback URL:
   - `https://0787-54-175-248-13.ngrok-free.app/callback`
-- Post logout URL used in client registration:
+- Previous post logout URL used in client registration:
   - `https://0787-54-175-248-13.ngrok-free.app/`
+
+### Current Stable HTTPS Setup
+
+- Chosen public hostname:
+  - `https://labai.54-175-248-13.sslip.io`
+- Active callback URL:
+  - `https://labai.54-175-248-13.sslip.io/callback`
+- Active post logout URL:
+  - `https://labai.54-175-248-13.sslip.io/`
+- Added Caddy as a reverse proxy in front of the Node app.
+- Enabled automatic HTTPS with Let's Encrypt for the `sslip.io` hostname.
+- Opened inbound AWS security group access for TCP `80` and `443` so ACME validation could complete.
+- Moved the app process and proxy process under `systemd` for persistence across logout and reboot.
 
 ## Functional Changes Made
 
@@ -57,10 +74,11 @@ Host: AWS EC2 Ubuntu 24.04
 
 ## Current Demo State
 
-- App runs successfully through browser-based authentication using the ngrok URL.
+- App is served over HTTPS at `https://labai.54-175-248-13.sslip.io`.
 - Todo0 MCP server is enabled and working in the demo flow.
 - QRTY MCP server is bypassed locally via env toggle.
 - Identity review toggle is available in the sidebar after authentication.
+- The app callback base and the IdP registration can now remain stable without `ngrok`.
 
 ## Commits Created In This Session
 
@@ -72,4 +90,7 @@ Host: AWS EC2 Ubuntu 24.04
 
 - Local secrets remain in the server-only `.env` and were not committed.
 - The app is currently running on port `3333`.
-- If the ngrok URL changes in a future session, the XAA client redirect URI must be updated to match the new callback URL.
+- Public HTTPS is terminated by Caddy and proxied to `localhost:3333`.
+- `okta-xaa-app.service` keeps the Node app running.
+- `caddy.service` keeps the reverse proxy and TLS certificate active.
+- If the EC2 public IP ever changes, the `sslip.io` hostname and IdP redirect URIs must be updated to match.
