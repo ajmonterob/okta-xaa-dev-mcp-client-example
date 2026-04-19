@@ -272,6 +272,132 @@
       display: grid;
       gap: 12px;
     }
+    .flow-intro {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .flow-intro-card {
+      background: #1b1c20;
+      border: 1px solid #2d2f36;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .flow-intro-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f3f4f6;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .flow-intro-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+    .concept-list {
+      display: grid;
+      gap: 8px;
+    }
+    .concept-item {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #d1d5db;
+    }
+    .concept-item strong {
+      color: #f3f4f6;
+    }
+    .flow-sequence {
+      display: grid;
+      gap: 10px;
+    }
+    .flow-step {
+      background: linear-gradient(180deg, #1d1f24 0%, #18191d 100%);
+      border: 1px solid #2d2f36;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .flow-step-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .flow-step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #7c3aed;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .flow-step-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f3f4f6;
+    }
+    .flow-step-subtitle {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+    .flow-step-body {
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #d1d5db;
+    }
+    .flow-claim-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .flow-claim {
+      background: #141519;
+      border: 1px solid #282a31;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .flow-claim-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .flow-claim-value {
+      font-size: 12px;
+      color: #e5e7eb;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+    .flow-server-list {
+      display: grid;
+      gap: 8px;
+    }
+    .flow-server {
+      background: #141519;
+      border: 1px solid #282a31;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .flow-server-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #f3f4f6;
+      margin-bottom: 6px;
+    }
+    .flow-note {
+      color: #9ca3af;
+    }
     .token-card {
       background: #1e1f23;
       border: 1px solid #2d2f36;
@@ -430,6 +556,178 @@
       max-height: 200px;
       overflow-y: auto;
     }
+    .tool-detail-section {
+      padding: 12px 14px;
+      border-top: 1px solid #2d2f36;
+    }
+    .tool-sensitive {
+      display: block;
+    }
+    .tool-sensitive-hint {
+      display: none;
+    }
+    .server-card {
+      padding: 10px 12px;
+      border: 1px solid #2d2f36;
+      border-radius: 10px;
+      background: #16171a;
+      margin-bottom: 8px;
+    }
+    .server-card:last-child {
+      margin-bottom: 0;
+    }
+    .server-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f3f4f6;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .server-scopes {
+      margin-top: 8px;
+      color: #9ca3af;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: normal;
+      word-break: break-word;
+    }
+    .last-token-panel {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #2d2f36;
+      display: grid;
+      gap: 8px;
+    }
+    .last-token-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #f3f4f6;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .last-token-subtitle {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #9ca3af;
+    }
+    .last-token-pre {
+      margin: 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: #141519;
+      border: 1px solid #2a2c33;
+      color: #d1d5db;
+      font-size: 11px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 260px;
+      overflow: auto;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+    .tool-detail-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .tool-flow {
+      display: grid;
+      gap: 8px;
+    }
+    .tool-flow-step {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    .tool-flow-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #7c3aed;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tool-flow-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #f3f4f6;
+      margin-bottom: 2px;
+    }
+    .tool-flow-text {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+    .tool-flow-text strong {
+      color: #f3f4f6;
+    }
+    .tool-claim-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    .tool-claim {
+      background: #16171a;
+      border: 1px solid #2a2c33;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .tool-claim-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .tool-claim-value {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #e5e7eb;
+      word-break: break-word;
+    }
+    .tool-token-raw {
+      margin-top: 10px;
+      border: 1px solid #2a2c33;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #16171a;
+    }
+    .tool-token-raw summary {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: #cbd5e1;
+      font-size: 12px;
+      list-style: none;
+    }
+    .tool-token-raw summary::-webkit-details-marker { display: none; }
+    .tool-token-raw pre {
+      margin: 0;
+      padding: 0 12px 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #d1d5db;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+    .tool-error-text {
+      color: #fca5a5;
+      font-family: 'SF Mono', 'Menlo', monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
     .tool-card.is-error .tool-name-badge { color: #f87171; }
 
     /* Thinking dots */
@@ -578,17 +876,6 @@
     <div id="server-list"></div>
   </div>
 
-  <div class="sidebar-section" id="review-section" style="display:none">
-    <div class="sidebar-label">Identity Review</div>
-    <div class="toggle-row">
-      <span>Reveal raw tokens</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="identity-toggle" />
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-  </div>
-
   <div class="user-section" id="user-section" style="display:none">
     <div class="user-row">
       <div class="avatar" id="user-avatar">U</div>
@@ -647,6 +934,7 @@
   // ── State ─────────────────────────────────────────────────────────────────
   let streaming = false;
   let identityReview = null;
+  let connectedServerNames = [];
 
   // ── Init ──────────────────────────────────────────────────────────────────
   async function init() {
@@ -690,13 +978,14 @@
     document.getElementById('auth-tag').innerHTML =
       '<div class="dot purple"></div><span>XAA Connected</span>';
 
+    identityReview = status.identityReview || null;
+
+    connectedServerNames = status.servers || [];
+
     // Servers list
     if (status.servers?.length) {
       document.getElementById('servers-section').style.display = 'block';
-      document.getElementById('server-list').innerHTML =
-        status.servers.map(s =>
-          `<div class="tag"><div class="dot green"></div><span>${esc(s)}</span></div>`
-        ).join('');
+      renderServerList(status.servers, identityReview);
     }
 
     // User info
@@ -706,16 +995,28 @@
       document.getElementById('user-avatar').textContent = status.user[0].toUpperCase();
     }
 
-    identityReview = status.identityReview || null;
     if (identityReview) {
-      document.getElementById('review-section').style.display = 'block';
       renderIdentityReview(identityReview);
-      const toggle = document.getElementById('identity-toggle');
-      toggle.checked = false;
-      toggle.addEventListener('change', () => {
-        document.getElementById('identity-review-panel').classList.toggle('visible', toggle.checked);
-      });
     }
+  }
+
+  function renderServerList(servers, review) {
+    const delegatedTokens = review?.delegatedTokens || {};
+    document.getElementById('server-list').innerHTML =
+      servers.map((serverName) => {
+        const token = delegatedTokens[serverName];
+        const payload = token?.payload && typeof token.payload === 'object' ? token.payload : {};
+        const scopes = formatScopes(payload);
+        return (
+          `<div class="server-card">` +
+            `<div class="server-name-row">` +
+              `<div class="dot green"></div>` +
+              `<span>${esc(serverName)}</span>` +
+            `</div>` +
+            `<div class="server-scopes">Allowed scopes: ${esc(scopes)}</div>` +
+          `</div>`
+        );
+      }).join('');
   }
 
   function renderIdentityReview(review) {
@@ -728,8 +1029,15 @@
         token,
       })),
     ];
+    const idPayload = review.idToken?.payload && typeof review.idToken.payload === 'object'
+      ? review.idToken.payload
+      : {};
+    const delegatedEntries = Object.entries(review.delegatedTokens || {});
 
-    body.innerHTML = entries.map((entry, index) =>
+    body.innerHTML =
+      renderFlowIntro() +
+      renderFlowSequence(idPayload, delegatedEntries) +
+      entries.map((entry, index) =>
       `<details class="token-card"${index === 0 ? ' open' : ''}>` +
         `<summary>` +
           `<div>` +
@@ -750,7 +1058,156 @@
           `<pre class="token-pre">${esc(prettyJson(entry.token.payload))}</pre>` +
         `</div>` +
       `</details>`
-    ).join('');
+      ).join('');
+  }
+
+  function renderFlowIntro() {
+    return (
+      `<div class="flow-intro">` +
+        `<div class="flow-intro-card">` +
+          `<div class="flow-intro-title">Understanding the Flow</div>` +
+          `<div class="flow-intro-text">This view breaks the enterprise auth exchange into ordered steps so you can inspect how identity becomes delegated access.</div>` +
+        `</div>` +
+        `<div class="flow-intro-card">` +
+          `<div class="flow-intro-title">Key Concepts</div>` +
+          `<div class="concept-list">` +
+            `<div class="concept-item"><strong>ID Token:</strong> Proves who the user is (identity).</div>` +
+            `<div class="concept-item"><strong>ID-JAG:</strong> Proves the agent is authorized to act for the user.</div>` +
+            `<div class="concept-item"><strong>Access Token:</strong> Grants specific permissions (scopes) to resources.</div>` +
+          `</div>` +
+        `</div>` +
+        `<div class="flow-intro-card">` +
+          `<div class="flow-intro-title">Why This Matters</div>` +
+          `<div class="flow-intro-text">This flow ensures agents can only access what users explicitly allow, with each service verifying trust independently. No single point of compromise can grant unauthorized access.</div>` +
+        `</div>` +
+      `</div>`
+    );
+  }
+
+  function renderFlowSequence(idPayload, delegatedEntries) {
+    return (
+      `<div class="flow-sequence">` +
+        renderStepOne(idPayload) +
+        renderStepTwo(idPayload) +
+        renderStepThree(delegatedEntries) +
+      `</div>`
+    );
+  }
+
+  function renderStepOne(idPayload) {
+    const claims = [
+      ['Subject', valueOrFallback(idPayload.sub)],
+      ['Email', valueOrFallback(idPayload.email)],
+      ['Issuer', valueOrFallback(idPayload.iss)],
+      ['Audience', formatClaimValue(idPayload.aud)],
+    ];
+
+    return (
+      `<section class="flow-step">` +
+        `<div class="flow-step-head">` +
+          `<div class="flow-step-number">1</div>` +
+          `<div>` +
+            `<div class="flow-step-title">User authenticates and receives an ID Token</div>` +
+            `<div class="flow-step-subtitle">The identity provider proves who the user is.</div>` +
+          `</div>` +
+        `</div>` +
+        `<div class="flow-step-body">` +
+          `<div>The app receives the original ID token after the OAuth callback completes.</div>` +
+          `<div class="flow-claim-grid">` +
+            claims.map(([label, value]) =>
+              `<div class="flow-claim">` +
+                `<div class="flow-claim-label">${esc(label)}</div>` +
+                `<div class="flow-claim-value">${esc(value)}</div>` +
+              `</div>`
+            ).join('') +
+          `</div>` +
+        `</div>` +
+      `</section>`
+    );
+  }
+
+  function renderStepTwo(idPayload) {
+    return (
+      `<section class="flow-step">` +
+        `<div class="flow-step-head">` +
+          `<div class="flow-step-number">2</div>` +
+          `<div>` +
+            `<div class="flow-step-title">XAA middleware exchanges the ID Token for an ID-JAG</div>` +
+            `<div class="flow-step-subtitle">The IDP authorizes the agent to act on behalf of the user.</div>` +
+          `</div>` +
+        `</div>` +
+        `<div class="flow-step-body">` +
+          `<div>The backend performs this exchange inside the Cross-App Access middleware before contacting MCP authorization servers.</div>` +
+          `<div class="flow-note">The current app does not persist the raw ID-JAG, so this step is shown as a verified transition in the flow rather than a raw token dump.</div>` +
+          `<div class="flow-claim-grid">` +
+            `<div class="flow-claim">` +
+              `<div class="flow-claim-label">Acts For</div>` +
+              `<div class="flow-claim-value">${esc(valueOrFallback(idPayload.email || idPayload.sub))}</div>` +
+            `</div>` +
+            `<div class="flow-claim">` +
+              `<div class="flow-claim-label">Exchange Type</div>` +
+              `<div class="flow-claim-value">ID Token → ID-JAG</div>` +
+            `</div>` +
+          `</div>` +
+        `</div>` +
+      `</section>`
+    );
+  }
+
+  function renderStepThree(delegatedEntries) {
+    const servers = delegatedEntries.length
+      ? delegatedEntries.map(([server, token]) => {
+          const payload = token?.payload && typeof token.payload === 'object' ? token.payload : {};
+          return (
+            `<div class="flow-server">` +
+              `<div class="flow-server-name">${esc(server)}</div>` +
+              `<div class="flow-claim-grid">` +
+                `<div class="flow-claim">` +
+                  `<div class="flow-claim-label">Scopes</div>` +
+                  `<div class="flow-claim-value">${esc(formatScopes(payload))}</div>` +
+                `</div>` +
+                `<div class="flow-claim">` +
+                  `<div class="flow-claim-label">Audience</div>` +
+                  `<div class="flow-claim-value">${esc(formatClaimValue(payload.aud))}</div>` +
+                `</div>` +
+              `</div>` +
+            `</div>`
+          );
+        }).join('')
+      : `<div class="flow-note">No delegated access tokens were captured for connected MCP servers.</div>`;
+
+    return (
+      `<section class="flow-step">` +
+        `<div class="flow-step-head">` +
+          `<div class="flow-step-number">3</div>` +
+          `<div>` +
+            `<div class="flow-step-title">Each MCP server receives a delegated access token</div>` +
+            `<div class="flow-step-subtitle">Authorization servers mint resource-specific permissions for the agent.</div>` +
+          `</div>` +
+        `</div>` +
+        `<div class="flow-step-body">` +
+          `<div>These access tokens are scoped per MCP resource, so each server only receives the permissions it needs.</div>` +
+          `<div class="flow-server-list">${servers}</div>` +
+        `</div>` +
+      `</section>`
+    );
+  }
+
+  function valueOrFallback(value) {
+    if (value === undefined || value === null || value === '') return 'Not present';
+    return String(value);
+  }
+
+  function formatClaimValue(value) {
+    if (Array.isArray(value)) return value.join(', ');
+    return valueOrFallback(value);
+  }
+
+  function formatScopes(payload) {
+    if (!payload || typeof payload !== 'object') return 'Not present';
+    if (typeof payload.scope === 'string' && payload.scope.trim()) return payload.scope.trim();
+    if (Array.isArray(payload.scp) && payload.scp.length) return payload.scp.join(', ');
+    return 'Not present';
   }
 
   // ── Send message ──────────────────────────────────────────────────────────
@@ -804,15 +1261,14 @@
 
             case 'thinking':
               // Show dots only if no text started yet in this segment
-              if (!hasText) bodyEl.innerHTML = thinkingDots();
+              if (!hasText) ensureThinkingIndicator(bodyEl);
               break;
 
             case 'token':
               if (!hasText) {
                 // First token — clear the thinking dots, start clean
                 // Remove only the thinking div, leave any existing tool cards
-                const td = bodyEl.querySelector('.thinking');
-                if (td) td.remove();
+                removeThinkingIndicator(bodyEl);
                 hasText = true;
               }
               fullText += evt.text;
@@ -834,6 +1290,7 @@
 
               const card = document.createElement('details');
               card.className = 'tool-card';
+              card.open = true;
               card.innerHTML =
                 `<summary>` +
                   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.6"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>` +
@@ -858,6 +1315,20 @@
                 resultDiv.className = 'tool-result-body';
                 resultDiv.textContent = evt.preview;
                 currentCard.appendChild(resultDiv);
+                currentCard.appendChild(buildToolSensitiveHint());
+                updateActionReviewPanel(evt);
+                if (evt.token) {
+                  if (identityReview && evt.server) {
+                    identityReview.delegatedTokens = identityReview.delegatedTokens || {};
+                    identityReview.delegatedTokens[evt.server] = evt.token;
+                    renderServerList(connectedServerNames, identityReview);
+                  }
+                  currentCard.appendChild(buildToolTokenSection(evt.token));
+                }
+                if (evt.isError && evt.rawError) {
+                  currentCard.appendChild(buildToolErrorSection(evt.rawError));
+                  currentCard.open = true;
+                }
                 currentCard = null;
               }
               // Reset for next Claude segment
@@ -865,8 +1336,13 @@
               scrollBottom();
               break;
 
+            case 'action_review':
+              updateActionReviewPanel(evt);
+              break;
+
             case 'done': {
               // Final render: replace live span with full markdown
+              removeThinkingIndicator(bodyEl);
               const live = bodyEl.querySelector('.live-text');
               if (live) live.remove();
               if (fullText) {
@@ -880,12 +1356,14 @@
             }
 
             case 'error':
+              removeThinkingIndicator(bodyEl);
               bodyEl.innerHTML = `<span style="color:#f87171">Error: ${esc(evt.message)}</span>`;
               break;
           }
         }
       }
     } catch {
+      removeThinkingIndicator(bodyEl);
       bodyEl.innerHTML = '<span style="color:#f87171">Connection error — please try again.</span>';
     }
 
@@ -910,6 +1388,17 @@
     return '<div class="thinking"><span></span><span></span><span></span></div>';
   }
 
+  function ensureThinkingIndicator(bodyEl) {
+    if (!bodyEl.querySelector('.thinking')) {
+      bodyEl.insertAdjacentHTML('beforeend', thinkingDots());
+    }
+  }
+
+  function removeThinkingIndicator(bodyEl) {
+    const td = bodyEl.querySelector('.thinking');
+    if (td) td.remove();
+  }
+
   function scrollBottom() {
     const el = document.getElementById('messages');
     el.scrollTop = el.scrollHeight;
@@ -923,6 +1412,193 @@
 
   function prettyJson(value) {
     return JSON.stringify(value, null, 2) || 'null';
+  }
+
+  function resetActionReviewPanel() {
+    const subtitleEl = document.getElementById('last-token-subtitle');
+    const preEl = document.getElementById('last-token-pre');
+    if (!subtitleEl || !preEl) return;
+    subtitleEl.textContent = 'No MCP action reviewed yet.';
+    preEl.textContent = 'After a chat-triggered MCP action runs, this panel will explain whether it was allowed or denied and why based on the token claims and the MCP result.';
+  }
+
+  function updateActionReviewPanel(evt) {
+    const subtitleEl = document.getElementById('last-token-subtitle');
+    const preEl = document.getElementById('last-token-pre');
+    if (!subtitleEl || !preEl) return;
+
+    if (evt.decision === 'Not attempted') {
+      subtitleEl.textContent = 'Not attempted: no MCP action was sent';
+      preEl.textContent = [
+        'Decision: Not attempted',
+        `Why: ${evt.reason || 'The assistant answered without calling an MCP tool.'}`,
+        '',
+        'Assistant response',
+        String(evt.assistantText || 'No assistant text captured.'),
+      ].join('\n');
+      return;
+    }
+
+    const token = evt.token || null;
+    const payload = token?.payload && typeof token.payload === 'object' ? token.payload : {};
+    const actionName = evt.name || 'Unknown action';
+    const serverName = evt.server || 'Unknown MCP Server';
+    const status = evt.isError ? 'Denied' : 'Allowed';
+    const scopes = formatScopes(payload);
+    const audience = formatClaimValue(payload.aud);
+    const subject = valueOrFallback(payload.sub);
+    const actor = valueOrFallback(payload.azp || payload.client_id);
+    const reason = buildActionReason(evt, scopes);
+
+    subtitleEl.textContent = `${status}: ${actionName} on ${serverName}`;
+
+    const lines = [
+      `Action: ${actionName}`,
+      `Server: ${serverName}`,
+      `Decision: ${status}`,
+      `Why: ${reason}`,
+      '',
+      'Token evidence',
+      `Subject: ${subject}`,
+      `Actor: ${actor}`,
+      `Audience: ${audience}`,
+      `Scopes: ${scopes}`,
+    ];
+
+    if (evt.isError && evt.rawError) {
+      lines.push('', 'Raw error', evt.rawError);
+    } else if (evt.decision === 'Denied' && evt.assistantText) {
+      lines.push('', 'Observed response', String(evt.assistantText));
+    } else if (evt.preview) {
+      lines.push('', 'Server result', String(evt.preview));
+    }
+
+    if (!token) {
+      lines.splice(4, 0, 'Token evidence could not be captured for this request, so this review is based on the MCP result only.');
+    }
+
+    preEl.textContent = lines.join('\n');
+  }
+
+  function buildActionReason(evt, scopes) {
+    if (evt.isError) {
+      const raw = String(evt.rawError || evt.preview || '').toLowerCase();
+      if (
+        raw.includes('insufficient_scope') ||
+        raw.includes('insufficient scope') ||
+        raw.includes('forbidden') ||
+        raw.includes('not authorized') ||
+        raw.includes('permission') ||
+        raw.includes('403') ||
+        raw.includes('401')
+      ) {
+        return `The MCP server rejected the action. The delegated token scopes available at the time were: ${scopes}.`;
+      }
+      return 'The MCP server rejected the action for a reason reported in the raw error below.';
+    }
+
+    if (!evt.token) {
+      return 'The MCP server accepted the action, but the delegated token was not captured in the browser review stream.';
+    }
+
+    return `The MCP server accepted the action using a delegated token whose scopes were: ${scopes}.`;
+  }
+
+  function updateLastTokenPanel(token, sourceLabel) {
+    const subtitleEl = document.getElementById('last-token-subtitle');
+    const preEl = document.getElementById('last-token-pre');
+    if (!subtitleEl || !preEl) return;
+    if (!token) {
+      subtitleEl.textContent = 'Waiting for a captured delegated token.';
+      preEl.textContent = 'No token captured yet.';
+      return;
+    }
+
+    const payload = token?.payload && typeof token.payload === 'object' ? token.payload : {};
+    const summary = {
+      source: sourceLabel || 'Unknown source',
+      subject: valueOrFallback(payload.sub),
+      audience: formatClaimValue(payload.aud),
+      scopes: formatScopes(payload),
+      actor: valueOrFallback(payload.azp || payload.client_id),
+      payload,
+      rawToken: token.raw || '',
+    };
+
+    subtitleEl.textContent = `Latest token from ${sourceLabel || 'unknown source'}.`;
+    preEl.textContent = prettyJson(summary);
+  }
+
+  function buildToolTokenSection(token) {
+    const payload = token?.payload && typeof token.payload === 'object' ? token.payload : {};
+    const section = document.createElement('div');
+    section.className = 'tool-detail-section tool-sensitive';
+    section.innerHTML =
+      buildToolFlowSection(payload) +
+      `<div class="tool-detail-label">Token Used For This Request</div>` +
+      `<div class="tool-claim-grid">` +
+        renderToolClaim('Scopes', formatScopes(payload)) +
+        renderToolClaim('Audience', formatClaimValue(payload.aud)) +
+        renderToolClaim('Subject', valueOrFallback(payload.sub)) +
+        renderToolClaim('Actor', valueOrFallback(payload.azp || payload.client_id)) +
+      `</div>` +
+      `<details class="tool-token-raw">` +
+        `<summary>View raw token</summary>` +
+        `<pre>${esc(token.raw || '')}</pre>` +
+      `</details>`;
+    return section;
+  }
+
+  function buildToolFlowSection(payload) {
+    const subject = valueOrFallback(payload.sub);
+    const actor = valueOrFallback(payload.azp || payload.client_id);
+    const scopes = formatScopes(payload);
+    return (
+      `<div class="tool-detail-label">Flow For This Request</div>` +
+      `<div class="tool-flow">` +
+        renderToolFlowStep('1', 'ID Token', `The user authenticated and proved identity as <strong>${esc(subject)}</strong>.`) +
+        renderToolFlowStep('2', 'ID-JAG', `The XAA middleware exchanged the ID token for an authorization grant so the agent could act on the user&apos;s behalf.`) +
+        renderToolFlowStep('3', 'Access Token', `The MCP authorization server minted the delegated token used here. Actor: <strong>${esc(actor)}</strong>. Scopes: <strong>${esc(scopes)}</strong>.`) +
+        renderToolFlowStep('4', 'MCP Request', `This tool invocation used that delegated access token for the request shown in this card.`) +
+      `</div>`
+    );
+  }
+
+  function buildToolErrorSection(rawError) {
+    const section = document.createElement('div');
+    section.className = 'tool-detail-section tool-sensitive';
+    section.innerHTML =
+      `<div class="tool-detail-label">Raw Error</div>` +
+      `<div class="tool-error-text">${esc(rawError)}</div>`;
+    return section;
+  }
+
+  function buildToolSensitiveHint() {
+    const section = document.createElement('div');
+    section.className = 'tool-sensitive-hint';
+    section.textContent = 'Enable "Review Identity details" to show the per-request flow, token used, and raw error inline in this chat card.';
+    return section;
+  }
+
+  function renderToolClaim(label, value) {
+    return (
+      `<div class="tool-claim">` +
+        `<div class="tool-claim-label">${esc(label)}</div>` +
+        `<div class="tool-claim-value">${esc(value)}</div>` +
+      `</div>`
+    );
+  }
+
+  function renderToolFlowStep(step, title, text) {
+    return (
+      `<div class="tool-flow-step">` +
+        `<div class="tool-flow-badge">${esc(step)}</div>` +
+        `<div>` +
+          `<div class="tool-flow-title">${esc(title)}</div>` +
+          `<div class="tool-flow-text">${text}</div>` +
+        `</div>` +
+      `</div>`
+    );
   }
 
   function autoResize(el) {

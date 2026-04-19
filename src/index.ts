@@ -68,6 +68,7 @@ interface IdentityReviewData {
 
 interface McpSessionData {
   connectedServers: Map<string, Client>;
+  delegatedTokenReaders: Map<string, () => string | undefined>;
   toolServerMap: Map<string, string>;
   resourceServerMap: Map<string, string>;
   tools: Anthropic.Tool[];
@@ -156,6 +157,26 @@ function getTokenScopes(token: TokenReviewRecord | undefined): string[] {
   return [];
 }
 
+function getBearerTokenFromFetchArgs(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): string | undefined {
+  const initHeaders = new Headers(init?.headers);
+  const initAuth = initHeaders.get('authorization');
+  if (initAuth?.startsWith('Bearer ')) {
+    return initAuth.slice('Bearer '.length);
+  }
+
+  if (typeof Request !== 'undefined' && input instanceof Request) {
+    const requestAuth = input.headers.get('authorization');
+    if (requestAuth?.startsWith('Bearer ')) {
+      return requestAuth.slice('Bearer '.length);
+    }
+  }
+
+  return undefined;
+}
+
 function formatToolError(
   err: unknown,
   serverName: string,
@@ -188,6 +209,50 @@ function formatToolError(
   ].join(' ');
 }
 
+function inferReviewForAssistantOnlyResponse(
+  userMessage: string,
+  identityReview: IdentityReviewData
+): {
+  decision: 'Denied' | 'Not attempted';
+  reason: string;
+  token?: TokenReviewRecord;
+  server?: string;
+} {
+  const normalized = userMessage.toLowerCase();
+  const requestedWriteAction =
+    normalized.includes('delete') ||
+    normalized.includes('remove') ||
+    normalized.includes('update') ||
+    normalized.includes('edit') ||
+    normalized.includes('modify') ||
+    normalized.includes('create') ||
+    normalized.includes('add') ||
+    normalized.includes('complete') ||
+    normalized.includes('close');
+
+  const delegatedEntries = Object.entries(identityReview.delegatedTokens || {});
+  const [serverName, token] = delegatedEntries[delegatedEntries.length - 1] || [];
+  const scopes = getTokenScopes(token);
+  const hasWriteLikeScope = scopes.some((scope) =>
+    /(write|delete|update|modify|create|add|complete|manage)/i.test(scope)
+  );
+
+  if (requestedWriteAction && token && !hasWriteLikeScope) {
+    const scopeText = scopes.length ? scopes.join(', ') : 'no scope claim found';
+    return {
+      decision: 'Denied',
+      reason: `The requested action needs write/delete-style permission, but the delegated token only has these scopes: ${scopeText}.`,
+      token,
+      server: serverName,
+    };
+  }
+
+  return {
+    decision: 'Not attempted',
+    reason: 'The assistant did not call an MCP tool on this turn, so the server never had a chance to allow or deny the action.',
+  };
+}
+
 // =============================================================================
 // Section 2: connectWithXAA() — Connect to one MCP server using Cross-App Access
 // =============================================================================
@@ -215,9 +280,9 @@ async function connectWithXAA(
   });
 
   const tokenCaptureFetch: typeof fetch = async (input, init) => {
-    const authHeader = new Headers(init?.headers).get('authorization');
-    if (authHeader?.startsWith('Bearer ')) {
-      delegatedAccessToken = authHeader.slice('Bearer '.length);
+    const bearerToken = getBearerTokenFromFetchArgs(input, init);
+    if (bearerToken) {
+      delegatedAccessToken = bearerToken;
     }
     return fetch(input, init);
   };
@@ -321,9 +386,10 @@ async function discoverCapabilities(connectedServers: Map<string, Client>) {
 async function handleToolCall(
   block: Anthropic.ToolUseBlock,
   connectedServers: Map<string, Client>,
+  delegatedTokenReaders: Map<string, () => string | undefined>,
   toolServerMap: Map<string, string>,
   resourceServerMap: Map<string, string>
-): Promise<{ content: string; serverName: string }> {
+): Promise<{ content: string; serverName: string; tokenUsed: TokenReviewRecord | null }> {
   const serverName = toolServerMap.get(block.name);
   if (!serverName) throw new Error(`Unknown tool: ${block.name}`);
 
@@ -333,9 +399,11 @@ async function handleToolCall(
     const ownerServer = resourceServerMap.get(uri) || serverName;
     const mcpClient = connectedServers.get(ownerServer)!;
     const result = await mcpClient.readResource({ uri });
+    const readToken = delegatedTokenReaders.get(ownerServer);
 
     return {
       serverName: ownerServer,
+      tokenUsed: buildTokenReviewRecord(readToken?.()),
       content: result.contents
         .map((c) => ('text' in c ? c.text : `[Binary: ${c.mimeType}]`))
         .join('\n'),
@@ -348,9 +416,11 @@ async function handleToolCall(
     name: block.name,
     arguments: block.input as Record<string, unknown>,
   });
+  const readToken = delegatedTokenReaders.get(serverName);
 
   return {
     serverName,
+    tokenUsed: buildTokenReviewRecord(readToken?.()),
     content: (result.content as Array<{ type: string; text?: string }>)
       .map((c) => c.text ?? JSON.stringify(c))
       .join('\n'),
@@ -371,6 +441,12 @@ const __dirname = dirname(__filename);
 const app = express();
 
 app.use(express.json());
+app.use((req, res, next) => {
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'no-store');
+  }
+  next();
+});
 app.use(express.static(join(__dirname, '..', 'public')));
 app.use(
   session({
@@ -401,7 +477,6 @@ app.get('/login', async (req, res) => {
     const authUrl = oidc.buildAuthorizationUrl(oidcConfig, new URLSearchParams({
       redirect_uri: CALLBACK_URL,
       scope: 'openid profile email',
-      prompt: 'login',
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
       state,
@@ -476,6 +551,7 @@ app.get('/callback', async (req, res) => {
 
     mcpSessions.set(req.sessionID, {
       connectedServers,
+      delegatedTokenReaders,
       toolServerMap,
       resourceServerMap,
       tools,
@@ -541,7 +617,7 @@ app.post('/api/chat', async (req, res) => {
     res.write(`data: ${JSON.stringify(payload)}\n\n`);
   };
 
-  const { connectedServers, toolServerMap, resourceServerMap, tools, conversationHistory, systemPrompt, identityReview } = data;
+  const { connectedServers, delegatedTokenReaders, toolServerMap, resourceServerMap, tools, conversationHistory, systemPrompt, identityReview } = data;
 
   conversationHistory.push({ role: 'user', content: message.trim() });
 
@@ -583,18 +659,40 @@ app.post('/api/chat', async (req, res) => {
           send({ type: 'tool_start', name: block.name, server: toolServerName });
 
           try {
-            const { content, serverName } = await handleToolCall(
+            const { content, serverName, tokenUsed } = await handleToolCall(
               block,
               connectedServers,
+              delegatedTokenReaders,
               toolServerMap,
               resourceServerMap
             );
-            send({ type: 'tool_result', name: block.name, server: serverName, preview: content.slice(0, 400) });
+            if (tokenUsed) {
+              identityReview.delegatedTokens[serverName] = tokenUsed;
+            }
+            send({
+              type: 'tool_result',
+              name: block.name,
+              server: serverName,
+              preview: content.slice(0, 400),
+              token: tokenUsed,
+            });
             toolResults.push({ type: 'tool_result', tool_use_id: block.id, content });
           } catch (err) {
             const serverName = toolServerMap.get(block.name) || 'Unknown MCP Server';
+            const tokenUsed = buildTokenReviewRecord(delegatedTokenReaders.get(serverName)?.());
+            if (tokenUsed) {
+              identityReview.delegatedTokens[serverName] = tokenUsed;
+            }
             const errMsg = formatToolError(err, serverName, identityReview);
-            send({ type: 'tool_result', name: block.name, server: serverName, preview: errMsg, isError: true });
+            send({
+              type: 'tool_result',
+              name: block.name,
+              server: serverName,
+              preview: errMsg,
+              isError: true,
+              token: tokenUsed,
+              rawError: err instanceof Error ? err.message : String(err),
+            });
             toolResults.push({
               type: 'tool_result',
               tool_use_id: block.id,
@@ -608,6 +706,20 @@ app.post('/api/chat', async (req, res) => {
         // Signal that Claude is processing tool results before next response
         send({ type: 'thinking' });
       } else {
+        const assistantText = response.content
+          .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+          .map((block) => block.text)
+          .join('\n')
+          .trim();
+        const inferredReview = inferReviewForAssistantOnlyResponse(message.trim(), identityReview);
+        send({
+          type: 'action_review',
+          decision: inferredReview.decision,
+          reason: inferredReview.reason,
+          token: inferredReview.token,
+          server: inferredReview.server,
+          assistantText,
+        });
         continueLoop = false;
         send({ type: 'done' });
       }
