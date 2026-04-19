@@ -1543,8 +1543,12 @@
         renderToolClaim('Actor', valueOrFallback(payload.azp || payload.client_id)) +
       `</div>` +
       `<details class="tool-token-raw">` +
-        `<summary>View raw token</summary>` +
-        `<pre>${esc(token.raw || '')}</pre>` +
+        `<summary>View token</summary>` +
+        `<pre>${esc(prettyJson({
+          header: token.header || null,
+          payload: token.payload || null,
+          raw: token.raw || '',
+        }))}</pre>` +
       `</details>`;
     return section;
   }
